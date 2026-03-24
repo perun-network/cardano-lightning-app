@@ -75,12 +75,22 @@ export default function InvoicePage() {
         {/* Left Column */}
         <div className="lg:col-span-7 space-y-6">
           {/* Status Indicator */}
-          <div className="flex items-center gap-4 bg-surface-container-low/50 backdrop-blur-md p-4 rounded-2xl border border-outline-variant/10">
-            <div className="w-3 h-3 rounded-full bg-primary status-pulse" />
-            <p className="font-label text-sm uppercase tracking-widest text-primary font-bold">
-              Waiting for payment...
-            </p>
-          </div>
+          {(() => {
+            const s = swapStatus?.status?.toLowerCase()
+            const isFailed = s === 'failed' || s === 'expired'
+            return (
+              <div className={`flex items-center gap-4 backdrop-blur-md p-4 rounded-2xl border border-outline-variant/10 ${
+                isFailed ? 'bg-error/10' : 'bg-surface-container-low/50'
+              }`}>
+                <div className={`w-3 h-3 rounded-full ${isFailed ? 'bg-error' : 'bg-primary status-pulse'}`} />
+                <p className={`font-label text-sm uppercase tracking-widest font-bold ${
+                  isFailed ? 'text-error' : 'text-primary'
+                }`}>
+                  {isFailed ? `Invoice ${swapStatus?.status}` : 'Waiting for payment...'}
+                </p>
+              </div>
+            )
+          })()}
 
           {swapStatus && (
             <TransactionSummary

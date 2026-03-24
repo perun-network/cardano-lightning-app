@@ -59,10 +59,12 @@ export default function Header() {
           )}
         </div>
         <div className="flex items-center gap-3">
-          <button className="material-symbols-outlined text-[#E2E2E2]/60 hover:text-[#E2E2E2] transition-all p-2 rounded-full hover:bg-[#2A2A2A]/50">
-            settings
-          </button>
-          <button className="bg-primary-container text-on-primary px-6 py-2.5 rounded-xl font-headline font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/10">
+          <button
+            disabled
+            aria-label="Connect wallet (coming soon)"
+            className="bg-primary-container/50 text-on-primary/60 px-6 py-2.5 rounded-xl font-headline font-bold cursor-not-allowed"
+            title="Wallet connection coming soon"
+          >
             Connect Wallet
           </button>
         </div>

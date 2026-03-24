@@ -37,7 +37,7 @@ export default function LightningQR({ bolt11, amount, expiresIn }: Props) {
       {/* QR Code */}
       <div className="w-full aspect-square bg-[#F8F9FA] rounded-[2rem] mb-8 flex items-center justify-center p-8 border-4 border-[#131313]/5">
         <QRCodeSVG
-          value={bolt11}
+          value={`lightning:${bolt11}`}
           size={320}
           level="M"
           bgColor="#F8F9FA"
@@ -61,14 +61,15 @@ export default function LightningQR({ bolt11, amount, expiresIn }: Props) {
 
         <button
           onClick={copyInvoice}
+          aria-label="Copy Lightning invoice to clipboard"
           className="w-full bg-[#131313] text-white font-headline font-extrabold py-5 rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
         >
           <span className="material-symbols-outlined">{copied ? 'check' : 'content_copy'}</span>
           {copied ? 'Copied!' : 'Copy Invoice String'}
         </button>
         <div className="pt-4 flex items-center justify-center gap-2 text-[#131313]/40">
-          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
-          <p className="text-[10px] font-label uppercase tracking-[0.2em] font-black">End-to-End Encrypted Bridge</p>
+          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
+          <p className="text-[10px] font-label uppercase tracking-[0.2em] font-black">Lightning Network Bridge</p>
         </div>
       </div>
     </div>

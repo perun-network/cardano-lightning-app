@@ -35,7 +35,7 @@ describe('routing integration (real AppRoutes)', () => {
 
   it('renders HistoryPage at /history', () => {
     renderAt('/history')
-    expect(screen.getByText(/No transactions yet/)).toBeInTheDocument()
+    expect(screen.getByText(/Loading transactions/)).toBeInTheDocument()
   })
 
   it('renders ProgressPage for swap at /progress/swap/:id', () => {

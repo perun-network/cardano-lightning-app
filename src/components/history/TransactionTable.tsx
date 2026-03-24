@@ -1,16 +1,70 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { HistoryItem } from '../../types'
+import type { HistoryItem, SwapDirection } from '../../types'
 import { formatCbtc } from '../../utils/format'
 
 interface Props {
   items: HistoryItem[]
 }
 
+type StatusFilter = 'all' | 'completed' | 'pending' | 'failed'
+
 export default function TransactionTable({ items }: Props) {
   const navigate = useNavigate()
+  const [directionFilter, setDirectionFilter] = useState<SwapDirection | 'all'>('all')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+
+  const filtered = items.filter((item) => {
+    if (directionFilter !== 'all' && item.direction !== directionFilter) return false
+    if (statusFilter === 'all') return true
+    const s = item.status.toLowerCase()
+    if (statusFilter === 'completed') return s === 'completed'
+    if (statusFilter === 'failed') return s === 'failed' || s === 'expired'
+    // pending = everything else
+    return s !== 'completed' && s !== 'failed' && s !== 'expired'
+  })
 
   return (
     <div className="glass-panel rounded-[2rem] overflow-hidden shadow-2xl border border-outline-variant/10">
+      {/* Filters */}
+      {items.length > 0 && (
+        <div className="flex flex-wrap gap-2 px-8 pt-6">
+          {/* Direction filter */}
+          {(['all', 'onramp', 'offramp'] as const).map((d) => (
+            <button
+              key={d}
+              onClick={() => setDirectionFilter(d)}
+              aria-label={`Filter by direction: ${d}`}
+              aria-pressed={directionFilter === d}
+              className={`font-label text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg transition-all ${
+                directionFilter === d
+                  ? 'bg-primary/20 text-primary font-bold'
+                  : 'bg-surface-container-high/30 text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              {d === 'all' ? 'All' : d === 'onramp' ? 'BTC → cBTC' : 'cBTC → BTC'}
+            </button>
+          ))}
+          <div className="w-px bg-outline-variant/20 mx-1" />
+          {/* Status filter */}
+          {(['all', 'completed', 'pending', 'failed'] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              aria-label={`Filter by status: ${s}`}
+              aria-pressed={statusFilter === s}
+              className={`font-label text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg transition-all ${
+                statusFilter === s
+                  ? 'bg-primary/20 text-primary font-bold'
+                  : 'bg-surface-container-high/30 text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              {s === 'all' ? 'All Status' : s.charAt(0).toUpperCase() + s.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -22,7 +76,7 @@ export default function TransactionTable({ items }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/5">
-            {items.map((item) => (
+            {filtered.map((item) => (
               <tr key={item.id} className="group hover:bg-surface-container-high/40 transition-all duration-300">
                 <td className="px-8 py-6">
                   <div className="flex items-center gap-3">
@@ -81,10 +135,10 @@ export default function TransactionTable({ items }: Props) {
                 </td>
               </tr>
             ))}
-            {items.length === 0 && (
+            {filtered.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-8 py-12 text-center text-on-surface-variant font-label">
-                  No transactions yet
+                  {items.length === 0 ? 'No transactions yet' : 'No matching transactions'}
                 </td>
               </tr>
             )}

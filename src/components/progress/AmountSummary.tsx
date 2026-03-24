@@ -1,9 +1,12 @@
+import { formatCbtc } from '../../utils/format'
+
 interface Props {
   status: string
   type: 'swap' | 'offramp'
+  amountBase?: number | null
 }
 
-export default function AmountSummary({ status, type }: Props) {
+export default function AmountSummary({ status, type, amountBase }: Props) {
   const isTerminal = ['completed', 'failed', 'expired'].includes(status.toLowerCase())
   const progress = isTerminal
     ? 100
@@ -25,6 +28,11 @@ export default function AmountSummary({ status, type }: Props) {
               <>cBTC <span className="text-primary text-lg">→ BTC</span></>
             )}
           </h2>
+          {amountBase != null && (
+            <p className="font-label text-sm text-on-surface-variant mt-1">
+              {formatCbtc(amountBase)} <span className="text-[10px] uppercase tracking-widest">cBTC</span>
+            </p>
+          )}
         </div>
         <div className="text-right">
           <p className="font-label text-xs text-on-surface-variant uppercase tracking-widest mb-1">Status</p>

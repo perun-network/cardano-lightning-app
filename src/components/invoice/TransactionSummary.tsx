@@ -43,8 +43,13 @@ export default function TransactionSummary({ swapStatus, cardanoAddress }: Props
         {cardanoAddress && (
           <div className="pt-4">
             <p className="font-label text-xs text-on-surface-variant uppercase tracking-widest mb-3">Destination Cardano Address</p>
-            <div className="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between group cursor-pointer hover:ring-1 ring-primary/30 transition-all"
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="Copy Cardano address to clipboard"
+              className="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between group cursor-pointer hover:ring-1 ring-primary/30 transition-all"
               onClick={copyAddress}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') copyAddress() }}
             >
               <p className="font-label text-sm truncate pr-4 text-on-surface/80">{cardanoAddress}</p>
               <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">{copied ? 'check' : 'content_copy'}</span>

@@ -30,6 +30,10 @@ export default function OfframpDepositPage() {
       setError('Invalid offramp ID')
       return
     }
+    if (!/^[0-9a-fA-F]{64}$/.test(txHash.trim())) {
+      setError('Invalid transaction hash (must be 64 hex characters)')
+      return
+    }
     setError('')
     setLoading(true)
     try {
@@ -69,15 +73,22 @@ export default function OfframpDepositPage() {
           </p>
         </div>
 
-        <div className="glass-panel p-8 rounded-[2rem] shadow-2xl space-y-8">
+        <form
+          className="glass-panel p-8 rounded-[2rem] shadow-2xl space-y-8"
+          onSubmit={(e) => { e.preventDefault(); handleConfirm() }}
+        >
           {/* Operator Address */}
           <div>
             <p className="font-label text-xs text-on-surface-variant uppercase tracking-widest mb-3">
               Send cBTC to this address
             </p>
             <div
+              role="button"
+              tabIndex={0}
+              aria-label="Copy operator address to clipboard"
               className="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between group cursor-pointer hover:ring-1 ring-primary/30 transition-all"
               onClick={copyAddress}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') copyAddress() }}
             >
               <p className="font-label text-sm truncate pr-4 text-on-surface/80">
                 {operatorAddress || 'Address unavailable — open this page from the Bridge flow'}
@@ -108,7 +119,7 @@ export default function OfframpDepositPage() {
           )}
 
           <button
-            onClick={handleConfirm}
+            type="submit"
             disabled={loading || !txHash.trim() || !operatorAddress}
             className="w-full bg-gradient-to-r from-primary-container to-primary text-on-primary py-5 rounded-2xl font-headline font-extrabold text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
           >
@@ -117,6 +128,7 @@ export default function OfframpDepositPage() {
 
           {!operatorAddress && (
             <button
+              type="button"
               onClick={() => navigate('/')}
               className="w-full mt-4 font-label text-sm text-primary hover:text-white transition-colors flex items-center justify-center gap-1"
             >
@@ -124,7 +136,7 @@ export default function OfframpDepositPage() {
               Back to Bridge
             </button>
           )}
-        </div>
+        </form>
       </div>
     </main>
   )

@@ -48,6 +48,7 @@ export default function SwapInput({
           }`}
           placeholder={placeholder}
           type={inputType === 'number' ? 'number' : 'text'}
+          min={inputType === 'number' ? '0' : undefined}
           step={inputType === 'number' ? 'any' : undefined}
           value={value}
           onChange={(e) => onChange?.(e.target.value)}

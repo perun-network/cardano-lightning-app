@@ -12,6 +12,7 @@ export default function SwapCard() {
     amount, setAmount,
     cardanoAddress, setCardanoAddress,
     bolt11Invoice, setBolt11Invoice,
+    poolInfo,
   } = useBridgeStore()
 
   const [loading, setLoading] = useState(false)
@@ -29,12 +30,21 @@ export default function SwapCard() {
           setError('Enter a valid amount')
           return
         }
-        if (!cardanoAddress.trim()) {
+        const addr = cardanoAddress.trim()
+        if (!addr) {
           setError('Enter a Cardano address')
+          return
+        }
+        if (!addr.startsWith('addr1') && !addr.startsWith('addr_test1')) {
+          setError('Invalid Cardano address (must start with addr1 or addr_test1)')
           return
         }
         // Convert human-readable cBTC to base units for the API
         const amountBase = cbtcToBase(parsed)
+        if (poolInfo && amountBase > poolInfo.available) {
+          setError(`Amount exceeds available liquidity (${(poolInfo.available / 1_000_000).toFixed(6)} cBTC)`)
+          return
+        }
         const resp = await requestSwap(amountBase, cardanoAddress.trim())
         sessionStorage.setItem(`invoice:${resp.payment_hash}`, JSON.stringify({
           bolt11: resp.bolt11, amount, cardanoAddress: cardanoAddress.trim(),
@@ -48,12 +58,22 @@ export default function SwapCard() {
           setError('Enter a valid amount')
           return
         }
-        if (!bolt11Invoice.trim()) {
+        const invoice = bolt11Invoice.trim().toLowerCase()
+        if (!invoice) {
           setError('Enter a BOLT11 invoice')
           return
         }
-        if (!cardanoAddress.trim()) {
+        if (!invoice.startsWith('lnbc') && !invoice.startsWith('lntb') && !invoice.startsWith('lntbs')) {
+          setError('Invalid BOLT11 invoice (must start with lnbc, lntb, or lntbs)')
+          return
+        }
+        const addr = cardanoAddress.trim()
+        if (!addr) {
           setError('Enter a Cardano address')
+          return
+        }
+        if (!addr.startsWith('addr1') && !addr.startsWith('addr_test1')) {
+          setError('Invalid Cardano address (must start with addr1 or addr_test1)')
           return
         }
         const amountBase = cbtcToBase(parsed)
@@ -73,7 +93,10 @@ export default function SwapCard() {
   }
 
   return (
-    <div className="glass-panel p-6 rounded-[2rem] shadow-2xl relative">
+    <form
+      className="glass-panel p-6 rounded-[2rem] shadow-2xl relative"
+      onSubmit={(e) => { e.preventDefault(); handleSubmit() }}
+    >
       {/* Top Input */}
       {isOnramp ? (
         <SwapInput
@@ -82,7 +105,7 @@ export default function SwapCard() {
           token="BTC"
           tokenIcon="bolt"
           tokenIconFill
-          placeholder="0.00 cBTC"
+          placeholder="0.00"
           inputType="number"
           onChange={setAmount}
         />
@@ -92,7 +115,7 @@ export default function SwapCard() {
           value={amount}
           token="cBTC"
           tokenIcon="circle"
-          placeholder="0.00 cBTC"
+          placeholder="0.00"
           inputType="number"
           onChange={setAmount}
         />
@@ -101,7 +124,9 @@ export default function SwapCard() {
       {/* Swap Connector */}
       <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
         <button
+          type="button"
           onClick={toggleDirection}
+          aria-label="Toggle swap direction"
           className="bg-surface-container-high p-3 rounded-xl shadow-xl border border-outline-variant/10 hover:scale-110 transition-transform cursor-pointer"
         >
           <span className="material-symbols-outlined text-primary block">swap_vert</span>
@@ -149,12 +174,12 @@ export default function SwapCard() {
 
       {/* Action Button */}
       <button
-        onClick={handleSubmit}
+        type="submit"
         disabled={loading}
         className="w-full mt-8 bg-gradient-to-r from-primary-container to-primary text-on-primary py-5 rounded-2xl font-headline font-extrabold text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
       >
         {loading ? 'Processing...' : isOnramp ? 'Initiate Swap' : 'Request Offramp'}
       </button>
-    </div>
+    </form>
   )
 }
