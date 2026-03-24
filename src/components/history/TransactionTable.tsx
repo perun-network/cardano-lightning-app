@@ -74,7 +74,7 @@ export default function TransactionTable({ items }: Props) {
                         navigate(`/progress/offramp/${item.id}`)
                       }
                     }}
-                    className="font-label text-[11px] uppercase tracking-widest text-primary hover:text-white transition-colors flex items-center gap-1 ml-auto group-hover:translate-x-[-4px] transition-transform"
+                    className="font-label text-[11px] uppercase tracking-widest text-primary hover:text-white flex items-center gap-1 ml-auto group-hover:translate-x-[-4px] transition-all"
                   >
                     View <span className="material-symbols-outlined text-sm">arrow_forward</span>
                   </button>

@@ -1,7 +1,7 @@
 const steps = [
-  { num: '01', text: 'Assets are locked on the Cardano network via secure smart contracts.' },
-  { num: '02', text: 'The Luminous Ledger verifies the cross-chain state in real-time.' },
-  { num: '03', text: 'Bitcoin is instantly released to your Lightning invoice.' },
+  { num: '01', text: 'Pay the Lightning invoice to send BTC to the bridge operator.' },
+  { num: '02', text: 'The bridge verifies your payment and mints cBTC on Cardano.' },
+  { num: '03', text: 'cBTC is delivered to your Cardano wallet address.' },
 ]
 
 export default function HowItWorks() {

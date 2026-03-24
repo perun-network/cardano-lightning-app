@@ -16,6 +16,8 @@ export default function ProgressPage() {
   const [offrampStatus, setOfframpStatus] = useState<OfframpStatusResponse | null>(null)
   const [error, setError] = useState('')
 
+  const offrampId = id && !isSwap ? parseInt(id) : NaN
+
   const pollFn = useCallback(async () => {
     if (!id) return true
     try {
@@ -25,7 +27,11 @@ export default function ProgressPage() {
         const st = s.status.toLowerCase()
         return st === 'completed' || st === 'failed' || st === 'expired'
       } else {
-        const s = await getOfframpStatus(parseInt(id))
+        if (Number.isNaN(offrampId)) {
+          setError('Invalid offramp ID')
+          return true
+        }
+        const s = await getOfframpStatus(offrampId)
         setOfframpStatus(s)
         const st = s.status.toLowerCase()
         return st === 'completed' || st === 'failed'
@@ -34,13 +40,10 @@ export default function ProgressPage() {
       setError(e instanceof Error ? e.message : 'Failed to fetch status')
       return false
     }
-  }, [id, isSwap])
+  }, [id, isSwap, offrampId])
 
-  // Initial fetch + polling
-  usePolling(pollFn, POLL_INTERVAL_MS, !!id)
-
-  // Also fetch immediately on mount
-  usePolling(pollFn, 0, !!id && !swapStatus && !offrampStatus)
+  // Fetch immediately on mount, then continue polling
+  usePolling(pollFn, POLL_INTERVAL_MS, !!id, true)
 
   const currentStatus = isSwap ? swapStatus?.status : offrampStatus?.status
   const steps = swapStatus ? buildSwapSteps(swapStatus) : offrampStatus ? buildOfframpSteps(offrampStatus) : []

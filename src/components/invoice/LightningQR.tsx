@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 
 interface Props {
@@ -7,8 +8,16 @@ interface Props {
 }
 
 export default function LightningQR({ bolt11, amount, expiresIn }: Props) {
-  const copyInvoice = () => {
-    navigator.clipboard.writeText(bolt11)
+  const [copied, setCopied] = useState(false)
+
+  const copyInvoice = async () => {
+    try {
+      await navigator.clipboard.writeText(bolt11)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // fallback: select text so user can copy manually
+    }
   }
 
   return (
@@ -54,8 +63,8 @@ export default function LightningQR({ bolt11, amount, expiresIn }: Props) {
           onClick={copyInvoice}
           className="w-full bg-[#131313] text-white font-headline font-extrabold py-5 rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
         >
-          <span className="material-symbols-outlined">content_copy</span>
-          Copy Invoice String
+          <span className="material-symbols-outlined">{copied ? 'check' : 'content_copy'}</span>
+          {copied ? 'Copied!' : 'Copy Invoice String'}
         </button>
         <div className="pt-4 flex items-center justify-center gap-2 text-[#131313]/40">
           <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>

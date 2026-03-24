@@ -10,8 +10,12 @@ import type {
 } from '../types'
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = {}
+  if (options?.body) {
+    headers['Content-Type'] = 'application/json'
+  }
   const resp = await fetch(`${RELAY_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...options,
   })
   if (!resp.ok) {

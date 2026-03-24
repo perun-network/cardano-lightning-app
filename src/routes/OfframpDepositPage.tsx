@@ -25,10 +25,15 @@ export default function OfframpDepositPage() {
 
   const handleConfirm = async () => {
     if (!txHash.trim() || !id) return
+    const offrampId = parseInt(id)
+    if (Number.isNaN(offrampId)) {
+      setError('Invalid offramp ID')
+      return
+    }
     setError('')
     setLoading(true)
     try {
-      await submitOfframpDeposit(parseInt(id), txHash.trim())
+      await submitOfframpDeposit(offrampId, txHash.trim())
       navigate(`/progress/offramp/${id}`)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Deposit notification failed')
@@ -37,8 +42,17 @@ export default function OfframpDepositPage() {
     }
   }
 
-  const copyAddress = () => {
-    if (operatorAddress) navigator.clipboard.writeText(operatorAddress)
+  const [addressCopied, setAddressCopied] = useState(false)
+
+  const copyAddress = async () => {
+    if (!operatorAddress) return
+    try {
+      await navigator.clipboard.writeText(operatorAddress)
+      setAddressCopied(true)
+      setTimeout(() => setAddressCopied(false), 2000)
+    } catch {
+      // clipboard not available
+    }
   }
 
   return (
@@ -69,7 +83,7 @@ export default function OfframpDepositPage() {
                 {operatorAddress || 'Address unavailable — open this page from the Bridge flow'}
               </p>
               <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">
-                content_copy
+                {addressCopied ? 'check' : 'content_copy'}
               </span>
             </div>
           </div>

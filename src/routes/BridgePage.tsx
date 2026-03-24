@@ -1,16 +1,9 @@
-import { useEffect } from 'react'
 import { useBridgeStore } from '../stores/bridgeStore'
 import SwapCard from '../components/bridge/SwapCard'
 import StatsBar from '../components/bridge/StatsBar'
 
 export default function BridgePage() {
-  const { direction, refreshPoolInfo } = useBridgeStore()
-
-  useEffect(() => {
-    refreshPoolInfo()
-    const interval = setInterval(refreshPoolInfo, 30_000)
-    return () => clearInterval(interval)
-  }, [refreshPoolInfo])
+  const { direction } = useBridgeStore()
 
   return (
     <main className="pt-32 pb-24 px-4 flex flex-col items-center relative overflow-hidden">
