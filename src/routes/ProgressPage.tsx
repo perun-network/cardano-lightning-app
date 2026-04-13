@@ -38,7 +38,8 @@ export default function ProgressPage() {
         return st === 'completed' || st === 'failed'
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to fetch status')
+      const { toUserError } = await import('../utils/errorMessages')
+      setError(toUserError(e instanceof Error ? e.message : 'Failed to fetch status'))
       return false
     }
   }, [id, isSwap, offrampId])

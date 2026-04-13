@@ -7,14 +7,22 @@ export default function OfframpDepositPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const operatorAddress = (() => {
-    const state = location.state as { operatorAddress?: string } | null
-    if (state?.operatorAddress) return state.operatorAddress
-    // Fallback: read from sessionStorage (survives page refresh)
+    // Type guard for location.state
+    const state = location.state as Record<string, unknown> | null
+    if (state && typeof state.operatorAddress === 'string' && state.operatorAddress) {
+      return state.operatorAddress
+    }
+    // Fallback: read from sessionStorage with validation
     if (id) {
       try {
-        const stored = JSON.parse(sessionStorage.getItem(`offramp:${id}`) || '{}')
-        return stored.operatorAddress || ''
-      } catch { /* ignore */ }
+        const raw = sessionStorage.getItem(`offramp:${id}`)
+        if (raw) {
+          const stored = JSON.parse(raw)
+          if (stored && typeof stored === 'object' && typeof stored.operatorAddress === 'string') {
+            return stored.operatorAddress
+          }
+        }
+      } catch { /* corrupted sessionStorage */ }
     }
     return ''
   })()
@@ -40,7 +48,8 @@ export default function OfframpDepositPage() {
       await submitOfframpDeposit(offrampId, txHash.trim())
       navigate(`/progress/offramp/${id}`)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Deposit notification failed')
+      const { toUserError } = await import('../utils/errorMessages')
+      setError(toUserError(e instanceof Error ? e.message : 'Deposit notification failed'))
     } finally {
       setLoading(false)
     }
