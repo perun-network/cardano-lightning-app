@@ -17,18 +17,35 @@ export default function InvoicePage() {
 
   // Resolve bolt11, amount, and cardanoAddress from location.state or sessionStorage
   const { bolt11, amountLabel, cardanoAddress } = useMemo(() => {
-    const state = location.state as { bolt11?: string; amount?: string; cardanoAddress?: string } | null
-    if (state?.bolt11) {
-      return { bolt11: state.bolt11, amountLabel: state.amount || '', cardanoAddress: state.cardanoAddress || '' }
+    const empty = { bolt11: '', amountLabel: '', cardanoAddress: '' }
+
+    // Type guard for location.state
+    const state = location.state as Record<string, unknown> | null
+    if (state && typeof state.bolt11 === 'string' && state.bolt11) {
+      return {
+        bolt11: state.bolt11,
+        amountLabel: typeof state.amount === 'string' ? state.amount : '',
+        cardanoAddress: typeof state.cardanoAddress === 'string' ? state.cardanoAddress : '',
+      }
     }
-    // Fallback: read from sessionStorage (survives page refresh)
+
+    // Fallback: read from sessionStorage with validation
     if (paymentHash) {
       try {
-        const stored = JSON.parse(sessionStorage.getItem(`invoice:${paymentHash}`) || '{}')
-        return { bolt11: stored.bolt11 || '', amountLabel: stored.amount || '', cardanoAddress: stored.cardanoAddress || '' }
-      } catch { /* ignore */ }
+        const raw = sessionStorage.getItem(`invoice:${paymentHash}`)
+        if (raw) {
+          const stored = JSON.parse(raw)
+          if (stored && typeof stored === 'object' && typeof stored.bolt11 === 'string') {
+            return {
+              bolt11: stored.bolt11,
+              amountLabel: typeof stored.amount === 'string' ? stored.amount : '',
+              cardanoAddress: typeof stored.cardanoAddress === 'string' ? stored.cardanoAddress : '',
+            }
+          }
+        }
+      } catch { /* corrupted sessionStorage — fall through */ }
     }
-    return { bolt11: '', amountLabel: '', cardanoAddress: '' }
+    return empty
   }, [location.state, paymentHash])
 
   // Initial fetch

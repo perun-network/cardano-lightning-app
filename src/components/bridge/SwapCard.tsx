@@ -86,7 +86,8 @@ export default function SwapCard() {
         })
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Request failed')
+      const { toUserError } = await import('../utils/errorMessages')
+      setError(toUserError(e instanceof Error ? e.message : 'Request failed'))
     } finally {
       setLoading(false)
     }

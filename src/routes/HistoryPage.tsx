@@ -42,7 +42,8 @@ export default function HistoryPage() {
       setItems(combined)
       setMetrics(m)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load history')
+      const { toUserError } = await import('../utils/errorMessages')
+      setError(toUserError(e instanceof Error ? e.message : 'Failed to load history'))
     } finally {
       setLoading(false)
     }
