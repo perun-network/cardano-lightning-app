@@ -1,0 +1,75 @@
+name: Release
+
+# Release convention: before tagging, bump package.json:
+#   npm version X.Y.Z --no-git-tag-version
+#   git commit -am "chore: bump version to X.Y.Z"
+#   git tag vX.Y.Z && git push && git push origin vX.Y.Z
+# The "Verify tag matches package.json version" step below enforces this.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Verify tag matches package.json version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::tag v${TAG_VERSION} does not match package.json version ${PKG_VERSION}"
+            echo "Fix: npm version ${TAG_VERSION} --no-git-tag-version, commit, retag."
+            exit 1
+          fi
+          echo "tag matches package.json: ${PKG_VERSION}"
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+      - name: Package dist
+        id: package
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            VERSION="${GITHUB_REF_NAME}"
+          else
+            VERSION="$(git rev-parse --short HEAD)"
+          fi
+          ARCHIVE_BASE="cardano-lightning-app-${VERSION}"
+          tar -czf "${ARCHIVE_BASE}.tar.gz" -C dist .
+          (cd dist && zip -rq "../${ARCHIVE_BASE}.zip" .)
+          echo "tar=${ARCHIVE_BASE}.tar.gz" >> "$GITHUB_OUTPUT"
+          echo "zip=${ARCHIVE_BASE}.zip"    >> "$GITHUB_OUTPUT"
+
+      - name: Upload build artifacts (workflow_dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cardano-lightning-app-dist
+          path: |
+            ${{ steps.package.outputs.tar }}
+            ${{ steps.package.outputs.zip }}
+
+      - name: Create GitHub Release (tag push only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            ${{ steps.package.outputs.tar }}
+            ${{ steps.package.outputs.zip }}
