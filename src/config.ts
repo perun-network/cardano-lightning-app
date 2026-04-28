@@ -1,7 +1,7 @@
 export const RELAY_URL =
   (window as unknown as Record<string, string>).RELAY_URL ||
   import.meta.env.VITE_RELAY_URL ||
-  'http://localhost:3000'
+  'https://cardano-ln.perun.network:3000'
 
 export const EXPLORER_BASE = 'https://preprod.cardanoscan.io/transaction/'
 
