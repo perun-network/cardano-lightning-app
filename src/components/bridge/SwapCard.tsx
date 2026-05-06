@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBridgeStore } from '../../stores/bridgeStore'
 import { requestSwap, requestOfframp } from '../../services/api'
-import { cbtcToBase } from '../../utils/format'
+import { parseCbtcInputToBase } from '../../utils/format'
 import SwapInput from './SwapInput'
 
 export default function SwapCard() {
@@ -39,8 +39,11 @@ export default function SwapCard() {
           setError('Invalid Cardano address (must start with addr1 or addr_test1)')
           return
         }
-        // Convert human-readable cBTC to base units for the API
-        const amountBase = cbtcToBase(parsed)
+        const amountBase = parseCbtcInputToBase(amount)
+        if (amountBase === null) {
+          setError('Amount must use at most 6 decimals')
+          return
+        }
         if (poolInfo && amountBase > poolInfo.available) {
           setError(`Amount exceeds available liquidity (${(poolInfo.available / 1_000_000).toFixed(6)} cBTC)`)
           return
@@ -76,7 +79,11 @@ export default function SwapCard() {
           setError('Invalid Cardano address (must start with addr1 or addr_test1)')
           return
         }
-        const amountBase = cbtcToBase(parsed)
+        const amountBase = parseCbtcInputToBase(amount)
+        if (amountBase === null) {
+          setError('Amount must use at most 6 decimals')
+          return
+        }
         const resp = await requestOfframp(bolt11Invoice.trim(), amountBase, cardanoAddress.trim())
         sessionStorage.setItem(`offramp:${resp.offramp_id}`, JSON.stringify({
           operatorAddress: resp.operator_address,

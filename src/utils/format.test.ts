@@ -1,4 +1,4 @@
-import { formatCbtc, cbtcToBase } from './format'
+import { formatCbtc, parseCbtcInputToBase } from './format'
 
 describe('formatCbtc', () => {
   it('converts base units to cBTC string with 6 decimals', () => {
@@ -22,27 +22,13 @@ describe('formatCbtc', () => {
   })
 })
 
-describe('cbtcToBase', () => {
-  it('converts cBTC to base units', () => {
-    expect(cbtcToBase(1.5)).toBe(1_500_000)
+describe('parseCbtcInputToBase', () => {
+  it('parses cBTC input without floating point rounding', () => {
+    expect(parseCbtcInputToBase('1.5')).toBe(1_500_000)
+    expect(parseCbtcInputToBase('0.000001')).toBe(1)
   })
 
-  it('handles zero', () => {
-    expect(cbtcToBase(0)).toBe(0)
-  })
-
-  it('rounds fractional base units', () => {
-    // 0.0000001 cBTC = 0.1 base units → rounds to 0
-    expect(cbtcToBase(0.0000001)).toBe(0)
-  })
-
-  it('is the inverse of formatCbtc', () => {
-    const original = 1_234_567
-    expect(cbtcToBase(parseFloat(formatCbtc(original)))).toBe(original)
-  })
-
-  it('handles whole numbers', () => {
-    expect(cbtcToBase(1)).toBe(1_000_000)
-    expect(cbtcToBase(100)).toBe(100_000_000)
+  it('rejects inputs below one cBTC base unit instead of rounding them up', () => {
+    expect(parseCbtcInputToBase('0.0000005')).toBeNull()
   })
 })

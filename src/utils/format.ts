@@ -6,7 +6,16 @@ export function formatCbtc(amount: number): string {
   return (amount / CBTC_BASE).toFixed(6)
 }
 
-/** Convert human-readable cBTC to base units for the API (e.g. 1.5 → 1500000). */
-export function cbtcToBase(cbtc: number): number {
-  return Math.round(cbtc * CBTC_BASE)
+/** Parse user-entered cBTC/BTC values exactly into cBTC base units. */
+export function parseCbtcInputToBase(input: string): number | null {
+  const trimmed = input.trim()
+  const match = trimmed.match(/^(\d+)(?:\.(\d{0,6}))?$/)
+  if (!match) return null
+
+  const whole = Number(match[1])
+  const fraction = Number((match[2] ?? '').padEnd(6, '0'))
+  const base = whole * CBTC_BASE + fraction
+
+  if (!Number.isSafeInteger(base) || base <= 0) return null
+  return base
 }

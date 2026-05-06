@@ -102,4 +102,15 @@ describe('SwapCard — validation', () => {
     expect(screen.getByText('Enter a Cardano address')).toBeInTheDocument()
     expect(mockedRequestSwap).not.toHaveBeenCalled()
   })
+
+  it('rejects amounts below one cBTC base unit instead of rounding them', async () => {
+    const user = userEvent.setup()
+    useBridgeStore.setState({ amount: '0.0000005', cardanoAddress: 'addr1test' })
+    renderSwapCard()
+
+    await user.click(screen.getByText('Initiate Swap'))
+
+    expect(screen.getByText('Amount must use at most 6 decimals')).toBeInTheDocument()
+    expect(mockedRequestSwap).not.toHaveBeenCalled()
+  })
 })
