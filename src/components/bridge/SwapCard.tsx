@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBridgeStore } from '../../stores/bridgeStore'
 import { requestSwap, requestOfframp } from '../../services/api'
-import { parseCbtcInputToBase } from '../../utils/format'
+import { formatCbtc, parseCbtcInputToBase } from '../../utils/format'
 import SwapInput from './SwapInput'
 
 export default function SwapCard() {
@@ -41,11 +41,11 @@ export default function SwapCard() {
         }
         const amountBase = parseCbtcInputToBase(amount)
         if (amountBase === null) {
-          setError('Amount must use at most 6 decimals')
+          setError('Amount must use at most 8 decimals')
           return
         }
         if (poolInfo && amountBase > poolInfo.available) {
-          setError(`Amount exceeds available liquidity (${(poolInfo.available / 1_000_000).toFixed(6)} cBTC)`)
+          setError(`Amount exceeds available liquidity (${formatCbtc(poolInfo.available)} cBTC)`)
           return
         }
         const resp = await requestSwap(amountBase, cardanoAddress.trim())
@@ -81,7 +81,7 @@ export default function SwapCard() {
         }
         const amountBase = parseCbtcInputToBase(amount)
         if (amountBase === null) {
-          setError('Amount must use at most 6 decimals')
+          setError('Amount must use at most 8 decimals')
           return
         }
         const resp = await requestOfframp(bolt11Invoice.trim(), amountBase, cardanoAddress.trim())

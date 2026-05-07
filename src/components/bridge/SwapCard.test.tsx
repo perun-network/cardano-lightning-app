@@ -33,7 +33,7 @@ beforeEach(() => {
 })
 
 describe('SwapCard — onramp unit conversion', () => {
-  it('sends base units (amount * 1_000_000) to requestSwap, not the raw input', async () => {
+  it('sends cBTC base units (amount * 100_000_000) to requestSwap, not the raw input', async () => {
     mockedRequestSwap.mockResolvedValue({ invoice_id: 1, bolt11: 'lnbc...', payment_hash: 'ph' })
     const user = userEvent.setup()
 
@@ -44,7 +44,7 @@ describe('SwapCard — onramp unit conversion', () => {
     await user.click(screen.getByText('Initiate Swap'))
 
     expect(mockedRequestSwap).toHaveBeenCalledOnce()
-    expect(mockedRequestSwap).toHaveBeenCalledWith(1_500_000, 'addr1test')
+    expect(mockedRequestSwap).toHaveBeenCalledWith(150_000_000, 'addr1test')
   })
 
   it('sends whole cBTC correctly', async () => {
@@ -56,7 +56,7 @@ describe('SwapCard — onramp unit conversion', () => {
 
     await user.click(screen.getByText('Initiate Swap'))
 
-    expect(mockedRequestSwap).toHaveBeenCalledWith(10_000_000, 'addr1test')
+    expect(mockedRequestSwap).toHaveBeenCalledWith(1_000_000_000, 'addr1test')
   })
 })
 
@@ -76,7 +76,7 @@ describe('SwapCard — offramp unit conversion', () => {
     await user.click(screen.getByText('Request Offramp'))
 
     expect(mockedRequestOfframp).toHaveBeenCalledOnce()
-    expect(mockedRequestOfframp).toHaveBeenCalledWith('lnbc_invoice', 2_500_000, 'addr1refund')
+    expect(mockedRequestOfframp).toHaveBeenCalledWith('lnbc_invoice', 250_000_000, 'addr1refund')
   })
 })
 
@@ -105,12 +105,12 @@ describe('SwapCard — validation', () => {
 
   it('rejects amounts below one cBTC base unit instead of rounding them', async () => {
     const user = userEvent.setup()
-    useBridgeStore.setState({ amount: '0.0000005', cardanoAddress: 'addr1test' })
+    useBridgeStore.setState({ amount: '0.000000001', cardanoAddress: 'addr1test' })
     renderSwapCard()
 
     await user.click(screen.getByText('Initiate Swap'))
 
-    expect(screen.getByText('Amount must use at most 6 decimals')).toBeInTheDocument()
+    expect(screen.getByText('Amount must use at most 8 decimals')).toBeInTheDocument()
     expect(mockedRequestSwap).not.toHaveBeenCalled()
   })
 })
