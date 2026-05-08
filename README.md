@@ -10,6 +10,8 @@ Web application for the Cardano-Lightning bridge. Swap between BTC (Lightning Ne
 
 Both directions are handled on a single Bridge page via a direction toggle.
 
+For a screenshot-based walkthrough, see the [user guide](docs/user-guide.md).
+
 ## Tech Stack
 
 - **React 19** + **TypeScript** + **Vite**
